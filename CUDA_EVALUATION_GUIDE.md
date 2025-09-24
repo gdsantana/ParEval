@@ -58,12 +58,13 @@ Isso criará `prompts/cuda-only-prompts.json` com 60 problemas CUDA específicos
 ```bash
 python3 generate/generate.py \
     --prompts prompts/cuda-only-prompts.json \
-    --model /caminho/para/sua/llm \
+    --model deepseek-ai/deepseek-coder-1.3b-base \
     --output cuda-results.json \
     --num_samples_per_prompt 50 \
     --temperature 0.2 \
     --prompted \
-    --max_new_tokens 1024
+    --max_new_tokens 1024 \
+    --restart
 ```
 
 **Parâmetros importantes**:

@@ -472,7 +472,7 @@ def get_inference_config(model_name : str, **kwargs) -> InferenceConfig:
         return ReplitConfig(**kwargs)
     elif model_name.startswith('ise-uiuc/Magicoder'):
         return MagicoderConfig(**kwargs)
-    elif model_name in ['deepseek-ai/deepseek-coder-6.7b-base', 'deepseek-ai/deepseek-coder-7b-base-v1.5']:
+    elif model_name in ['deepseek-ai/deepseek-coder-6.7b-base', 'deepseek-ai/deepseek-coder-7b-base-v1.5',  'deepseek-ai/deepseek-coder-1.3b-base']:
         return DeepSeekBaseConfig(**kwargs)
     elif model_name.startswith('hpcgroup/hpc-coder-v2'):
         return InstructConfig(instruction_tag='Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:', response_tag='### Response:', **kwargs)
