@@ -95,8 +95,11 @@ python3 drivers/run-all.py cuda-results.json \
 # Converter resultados para CSV
 python3 analysis/create-dataframe.py cuda-evaluation.json --output cuda-results.csv
 
-# Calcular métricas finais
+# Calcular métricas finais (k = 1,5,10,20 por padrão)
 python3 analysis/metrics.py cuda-results.csv --output cuda-metrics.csv
+
+# Ou especificar valores de k customizados
+python3 analysis/metrics.py cuda-results.csv --k 1 10 50 100 --output cuda-metrics.csv
 ```
 
 ### Passo 5: Analisar Resultados
@@ -180,10 +183,14 @@ python3 drivers/run-all.py cuda-results.json \
 
 ### Métricas Principais
 
-- **pass@1**: Pelo menos 1 solução correta entre as geradas
-- **pass@10**: Pelo menos 1 solução correta entre as 10 melhores
-- **build@k**: Taxa de compilação sem erros
-- **efficiency@k**: Correção dos resultados numéricos
+O sistema calcula automaticamente para **k = [1, 5, 10, 20]** (personalizável):
+
+- **pass@k**: Probabilidade de ≥1 solução correta entre as k melhores
+- **build@k**: Probabilidade de ≥1 compilação bem-sucedida entre as k melhores  
+- **speedup@k**: Speedup esperado escolhendo a melhor entre k amostras
+- **efficiency@k**: Eficiência esperada (speedup/recursos) entre k amostras
+
+**Exemplo**: pass@10 = 0.85 significa 85% de chance de ter pelo menos 1 solução correta entre as 10 melhores tentativas.
 
 ### Comparação com Leaderboard
 
