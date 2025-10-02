@@ -8,8 +8,6 @@ from tqdm import tqdm
 
 # tpl imports
 import torch
-from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
-from peft import PeftModel
 from transformers import pipeline
 
 # local imports
@@ -36,7 +34,6 @@ parser.add_argument('--do_sample', action='store_true', help='Enable sampling (d
 parser.add_argument('--batch_size', type=int, default=16, help='Batch size for generation (default: 8)')
 parser.add_argument('--prompted', action='store_true', help='Use prompted generation. See StarCoder paper (default: False)')
 parser.add_argument('--hf_token', type=str, help='HuggingFace API token for loading models')
-parser.add_argument('--adapter_path', type=str, default=None, help='Path to the LoRA adapter')
 args = parser.parse_args()
 
 """ Load prompts """
@@ -101,34 +98,7 @@ inference_config = get_inference_config(args.model, prompted=args.prompted)
 prompts_repeated = [p for p in prompts for _ in range(args.num_samples_per_prompt)]
 
 """ Initialize HuggingFace pipeline for generation """
-if args.adapter_path is not None:
-    if not PEFT_AVAILABLE:
-        raise ImportError("PEFT library is required for LoRA adapters. Install with: pip install peft")
-    
-    print(f"Loading base model: {args.model}")
-    tokenizer = AutoTokenizer.from_pretrained(args.model, token=args.hf_token)
-    base_model = AutoModelForCausalLM.from_pretrained(
-        args.model,
-        torch_dtype=inference_config.get_dtype(),
-        device_map="auto",
-        token=args.hf_token
-    )
-    
-    print(f"Loading LoRA adapter: {args.adapter_path}")
-    model = PeftModel.from_pretrained(base_model, args.adapter_path)
-    
-    print("Merging adapter with base model...")
-    model = model.merge_and_unload()
-    
-    generator = pipeline(
-        task="text-generation",
-        model=model,
-        tokenizer=tokenizer,
-        torch_dtype=inference_config.get_dtype(),
-        device=0
-    )
-else:
-    generator = pipeline(task="text-generation", model=args.model, torch_dtype=inference_config.get_dtype(), device=0, token=args.hf_token)
+generator = pipeline(task="text-generation", model=args.model, torch_dtype=inference_config.get_dtype(), device=0, token=args.hf_token)
 inference_config.init_padding(generator.tokenizer)
 
 """ Create a prompt data set to pass to generate method """
