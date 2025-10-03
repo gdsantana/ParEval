@@ -5,6 +5,7 @@
 *.pyc
 __pycache__
 .env
+venv
 
 # cpp
 *.out
@@ -14,3 +15,6 @@ a.out
 
 # editor buffers
 *~
+
+
+results/

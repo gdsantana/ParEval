@@ -5,8 +5,9 @@ Este guia mostra como avaliar uma LLM refinada para programação CUDA usando o 
 ## Visão Geral
 
 O ParvEval contém **60 problemas CUDA** que cobrem:
+
 - **Geometria**: closest pair, convex hull, triangulação
-- **Transformações**: ReLU, mapeamentos, operações elemento-wise  
+- **Transformações**: ReLU, mapeamentos, operações elemento-wise
 - **Reduções**: soma, produto, XOR, médias
 - **Álgebra Linear**: multiplicação matriz-vetor, decomposições
 - **Stencils**: operações de vizinhança
@@ -15,6 +16,7 @@ O ParvEval contém **60 problemas CUDA** que cobrem:
 ## Pré-requisitos
 
 ### Software Necessário
+
 - Python ≥3.7
 - Compilador C++ com suporte a C++17 e OpenMP
 - Make e CMake
@@ -24,17 +26,20 @@ O ParvEval contém **60 problemas CUDA** que cobrem:
 ### Instalação
 
 1. **Clone o repositório**:
+
 ```bash
 git clone --recurse-submodules https://github.com/parallelcodefoundry/ParEval.git
 cd ParEval
 ```
 
 2. **Instale dependências Python**:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 3. **Compile os drivers C++**:
+
 ```bash
 cd drivers/cpp
 make
@@ -59,7 +64,7 @@ Isso criará `prompts/cuda-only-prompts.json` com 60 problemas CUDA específicos
 python3 generate/generate.py \
     --prompts prompts/cuda-only-prompts.json \
     --model deepseek-ai/deepseek-coder-1.3b-base \
-    --output cuda-results.json \
+    --output result-deepseek-coder-1.3b-base.json \
     --num_samples_per_prompt 50 \
     --temperature 0.2 \
     --prompted \
@@ -68,6 +73,7 @@ python3 generate/generate.py \
 ```
 
 **Parâmetros importantes**:
+
 - `--model`: Caminho para sua LLM ou handle do HuggingFace
 - `--num_samples_per_prompt`: Número de soluções por problema (padrão: 50)
 - `--prompted`: Adiciona comentários de solução (recomendado)
@@ -85,6 +91,7 @@ python3 drivers/run-all.py cuda-results.json \
 ```
 
 **Parâmetros importantes**:
+
 - `--include-models cuda`: Testa apenas CUDA
 - `--yes-to-all`: Responde sim para todas as confirmações
 - `--build-timeout`: Timeout para compilação (segundos)
@@ -113,6 +120,7 @@ As métricas calculadas incluem:
 - **speedup@k**: Ganho de performance vs implementação serial
 
 Visualize os resultados:
+
 ```bash
 # Ver métricas resumidas
 cat cuda-metrics.csv
@@ -158,7 +166,7 @@ python3 generate/generate-openai.py \
     --model gpt-4 \
     --output cuda-openai.json
 
-# Gemini  
+# Gemini
 python3 generate/generate-gemini.py \
     --prompts prompts/cuda-only-prompts.json \
     --model gemini-pro \
@@ -187,7 +195,7 @@ python3 drivers/run-all.py cuda-results.json \
 O sistema calcula automaticamente para **k = [1, 5, 10, 20]** (personalizável):
 
 - **pass@k**: Probabilidade de ≥1 solução correta entre as k melhores
-- **build@k**: Probabilidade de ≥1 compilação bem-sucedida entre as k melhores  
+- **build@k**: Probabilidade de ≥1 compilação bem-sucedida entre as k melhores
 - **speedup@k**: Speedup esperado escolhendo a melhor entre k amostras
 - **efficiency@k**: Eficiência esperada (speedup/recursos) entre k amostras
 
@@ -202,14 +210,17 @@ Compare seus resultados com o [ParvEval Leaderboard](https://pssg.cs.umd.edu/blo
 ### Problemas Comuns
 
 1. **Erro de compilação CUDA**:
+
    - Verifique se CUDA toolkit está instalado
    - Confirme que `nvcc` está no PATH
 
 2. **Timeout durante execução**:
+
    - Aumente `--run-timeout` para problemas complexos
    - Verifique se GPU tem memória suficiente
 
 3. **Erro de memória**:
+
    - Reduza `--batch_size` na geração
    - Use `--num_samples_per_prompt` menor
 

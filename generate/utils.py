@@ -348,14 +348,14 @@ class DeepSeekBaseConfig(InferenceConfig):
         return torch.bfloat16
 
     def init_padding(self, tokenizer):
-        tokenizer.pad_token_id = tokenizer.eos_token_id  # for batching
-        tokenizer.padding_side = "left"   # for decoder-only models
+        tokenizer.pad_token_id = tokenizer.eos_token_id
+        tokenizer.padding_side = "left"
 
     def get_pad_token_id(self, tokenizer) -> int:
         return tokenizer.pad_token_id
 
     def get_eos_token_id(self, tokenizer) -> int:
-        return tokenizer.eos_token_id
+        return None
     
     def trust_remote_code(self) -> bool:
         return False
