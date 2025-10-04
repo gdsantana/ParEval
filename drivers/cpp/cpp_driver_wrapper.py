@@ -13,7 +13,7 @@ import tempfile
 
 # local imports
 sys.path.append("..")
-from drivers.driver_wrapper import DriverWrapper, BuildOutput, RunOutput, GeneratedTextResult
+from driver_wrapper import DriverWrapper, BuildOutput, RunOutput, GeneratedTextResult
 from util import run_command
 
 """ Map parallelism models to driver files """
