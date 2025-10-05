@@ -485,7 +485,8 @@ def get_inference_config(model_name : str, **kwargs) -> InferenceConfig:
     elif model_name.startswith('Qwen/Qwen2.5'):
         return QwenConfig(**kwargs)
     else:
-        raise ValueError(f"Unknown model name: {model_name}")
+        # raise ValueError(f"Unknown model name: {model_name}")
+        return DeepSeekBaseConfig(**kwargs)
 
 
 class PromptDataset(Dataset):
