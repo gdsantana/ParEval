@@ -34,9 +34,6 @@ parser.add_argument('--do_sample', action='store_true', help='Enable sampling (d
 parser.add_argument('--batch_size', type=int, default=16, help='Batch size for generation (default: 8)')
 parser.add_argument('--prompted', action='store_true', help='Use prompted generation. See StarCoder paper (default: False)')
 parser.add_argument('--hf_token', type=str, help='HuggingFace API token for loading models')
-parser.add_argument('--device', type=str, default='auto', help='Device to use: "cpu", "cuda", "auto" (default: auto)')
-parser.add_argument('--low_memory', action='store_true', help='Enable low memory mode (reduces batch size and uses CPU offloading)')
-parser.add_argument('--dtype', type=str, choices=['float16', 'bfloat16', 'float32'], help='Override data type for model weights')
 args = parser.parse_args()
 
 """ Load prompts """
@@ -101,55 +98,7 @@ inference_config = get_inference_config(args.model, prompted=args.prompted)
 prompts_repeated = [p for p in prompts for _ in range(args.num_samples_per_prompt)]
 
 """ Initialize HuggingFace pipeline for generation """
-# Determine device
-if args.device == 'cpu':
-    device = -1  # CPU
-    print("[INFO] Using CPU for inference")
-elif args.device == 'cuda':
-    if torch.cuda.is_available():
-        device = 0  # GPU 0
-        print("[INFO] Using CUDA GPU for inference")
-    else:
-        device = -1
-        print("[WARNING] CUDA not available, falling back to CPU")
-else:  # auto
-    if torch.cuda.is_available():
-        device = 0
-        print("[INFO] Auto-detected CUDA GPU for inference")
-    else:
-        device = -1
-        print("[INFO] Auto-detected CPU for inference")
-
-# Determine dtype
-if args.dtype:
-    if args.dtype == 'float16':
-        dtype = torch.float16
-    elif args.dtype == 'bfloat16':
-        dtype = torch.bfloat16
-    else:
-        dtype = torch.float32
-else:
-    dtype = inference_config.get_dtype()
-    # Force float32 on CPU for compatibility
-    if device == -1:
-        dtype = torch.float32
-
-# Adjust batch size for low memory mode
-effective_batch_size = args.batch_size
-if args.low_memory:
-    effective_batch_size = min(args.batch_size, 4)
-    print(f"[INFO] Low memory mode: reducing batch size to {effective_batch_size}")
-
-print(f"[INFO] Using dtype: {dtype}, device: {'CPU' if device == -1 else f'CUDA:{device}'}, batch_size: {effective_batch_size}")
-
-generator = pipeline(
-    task="text-generation", 
-    model=args.model, 
-    torch_dtype=dtype, 
-    device=device, 
-    token=args.hf_token,
-    model_kwargs={"low_cpu_mem_usage": True} if args.low_memory else {}
-)
+generator = pipeline(task="text-generation", model=args.model, torch_dtype=inference_config.get_dtype(), device=0, token=args.hf_token)
 inference_config.init_padding(generator.tokenizer)
 
 """ Create a prompt data set to pass to generate method """
@@ -162,7 +111,7 @@ generated_outputs = generator(
     top_p=args.top_p,
     pad_token_id=inference_config.get_pad_token_id(generator.tokenizer),
     eos_token_id=inference_config.get_eos_token_id(generator.tokenizer),
-    batch_size=effective_batch_size,
+    batch_size=args.batch_size,
 )
 
 """ Iterate over prompts and generate code """
