@@ -3,7 +3,7 @@ MPICXX = mpicxx
 CXX_FLAGS = -std=c++17 -O3
 Kokkos_PATH ?= ../../tpl/kokkos/build
 
-HAS_NVCC := $(shell command -v nvcc 2> /dev/null)
+HAS_NVCC := $(shell test -f /usr/local/cuda/bin/nvcc && echo "/usr/local/cuda/bin/nvcc")
 HAS_HIPCC := $(shell command -v hipcc 2> /dev/null)
 HAS_KOKKOS := $(shell test -d $(Kokkos_PATH)/lib64/ && echo "true")
 
@@ -37,7 +37,7 @@ all: $(ALL_DRIVERS)
 %cuda-driver.o: %cuda-driver.cu
 ifdef HAS_NVCC
 	@echo "nvcc found, compiling $(HAS_NVCC)"
-	nvcc -std=c++17 -O3 -o $@ -c $<
+	$(HAS_NVCC) -std=c++17 -O3 -o $@ -c $<
 else
 	@echo "nvcc not found, skipping $@"
 endif
