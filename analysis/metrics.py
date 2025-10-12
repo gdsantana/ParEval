@@ -3,12 +3,16 @@
 # std imports
 import argparse
 import json
+import warnings
 from math import comb
 from typing import Union
 
 # tpl imports
 import numpy as np
 import pandas as pd
+
+# Suppress pandas FutureWarnings
+warnings.filterwarnings('ignore', category=FutureWarning)
 
 
 def get_args():
@@ -262,6 +266,12 @@ def main():
     # read in input
     df = pd.read_csv(args.input_csv)
 
+    # add missing columns with default values if they don't exist
+    if "num_threads" not in df.columns:
+        df["num_threads"] = None
+    if "num_procs" not in df.columns:
+        df["num_procs"] = None
+
     # read in problem sizes
     with open(args.problem_sizes, "r") as f:
         problem_sizes = json.load(f)
@@ -270,11 +280,12 @@ def main():
                 df.loc[(df["name"] == problem) & (df["parallelism_model"] == parallelism_model), "problem_size"] = parse_problem_size(problem_size)
 
     # remove rows where parallelism_model is kokkos and num_threads is 64
-    df = df[~((df["parallelism_model"] == "kokkos") & (df["num_threads"] == 64))]
+    if "num_threads" in df.columns:
+        df = df[~((df["parallelism_model"] == "kokkos") & (df["num_threads"] == 64))]
 
     # filter/aggregate
-    df["did_run"] = df["did_run"].fillna(False)     # if it didn't build, then this will be nan; overwrite
-    df["is_valid"] = df["is_valid"].fillna(False)   # if it didn't build, then this will be nan; overwrite
+    df["did_run"] = df["did_run"].fillna(False).infer_objects(copy=False)     # if it didn't build, then this will be nan; overwrite
+    df["is_valid"] = df["is_valid"].fillna(False).infer_objects(copy=False)   # if it didn't build, then this will be nan; overwrite
 
     # get only valid runs
     valid_runs = get_correctness_df(df)

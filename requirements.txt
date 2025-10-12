@@ -9,3 +9,5 @@ torchaudio
 torchvision
 tqdm
 transformers
+matplotlib
+seaborn
