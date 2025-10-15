@@ -11,3 +11,8 @@ tqdm
 transformers
 matplotlib
 seaborn
+
+# For GGUF quantized models (optional - only if using generate_gguf.py)
+# Install with CUDA support: CMAKE_ARGS="-DLLAMA_CUDA=on" pip install llama-cpp-python
+llama-cpp-python
+vllm
